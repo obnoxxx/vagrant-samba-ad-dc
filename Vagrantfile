@@ -42,6 +42,15 @@ vms = [
       #  #:ipv4 => '10.111.222.201',
       #},
     ],
+    :role => 's4dc',
+    :config => {
+      :s4dc => {
+        :domain => 'S4AD',
+        :realm => 's4ad.private',
+        :adminpass => 'Passw0rd',
+        :function_level => '2008_R2',
+      },
+    },
   },
 ]
 
@@ -98,6 +107,11 @@ SCRIPT
 SCRIPT_PROVISION = <<SCRIPT
 set -e
 
+DOMAIN=$1
+REALM=$2
+ADMINPASS=$3
+FUNCTION_LEVEL=$4
+
 stop smbd || true
 stop nmbd || true
 stop samba-ad-dc || true
@@ -109,11 +123,11 @@ test -f ${FILE} || touch ${FILE}
 mv -f ${FILE} ${FILE}${BACKUP_SUFFIX}
 
 samba-tool domain provision \
-	--domain=S4AD \
-	--realm=s4ad.private \
-	--adminpass=Passw0rd \
+	--domain=${DOMAIN} \
+	--realm=${REALM} \
+	--adminpass=${ADMINPASS} \
 	--server-role=dc \
-	--function-level=2008_R2 \
+	--function-level=${FUNCTION_LEVEL} \
 	--use-rfc2307
 
 FILE=/etc/resolv.conf
@@ -121,8 +135,8 @@ test -f ${FILE} || touch ${FILE}
 mv -f ${FILE} ${FILE}${BACKUP_SUFFIX}
 cat <<EOF > ${FILE}
 nameserver 127.0.0.1
-domain s4ad.private
-search s4ad.private
+domain ${REALM}
+search ${REALM}
 EOF
 
 sudo sed -i${BACKUP_SUFFIX} -e 's/passwd: .*/passwd:         files winbind/g' -e 's/group: .*/group:          files winbind/g' /etc/nsswitch.conf
@@ -152,14 +166,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           end
         end
       end
+
       #node.vm.synced_folder "shared/", "/shared"
+
+      node.vm.provision :shell, inline: SCRIPT_INSTALL
+      if machine[:role] == 's4dc'
+        cfg = machine[:config][:s4dc]
+        node.vm.provision :shell do |s|
+          s.inline = SCRIPT_PROVISION
+          s.args   = [ cfg[:domain], cfg[:realm], cfg[:adminpass],
+                       cfg[:function_level] ]
+        end
+      end
     end
   end
 
   #
   # Provisioning common to all machines:
   #
-  config.vm.provision :shell, inline: SCRIPT_INSTALL
-  config.vm.provision :shell, inline: SCRIPT_PROVISION
 
 end
