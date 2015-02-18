@@ -105,6 +105,7 @@ stop samba-ad-dc || true
 BACKUP_SUFFIX=".orig.$(date +%Y%m%d-%H%M%S)"
 
 FILE=/etc/samba/smb.conf
+test -f ${FILE} || touch ${FILE}
 mv -f ${FILE} ${FILE}${BACKUP_SUFFIX}
 
 samba-tool domain provision \
@@ -116,6 +117,7 @@ samba-tool domain provision \
 	--use-rfc2307
 
 FILE=/etc/resolv.conf
+test -f ${FILE} || touch ${FILE}
 mv -f ${FILE} ${FILE}${BACKUP_SUFFIX}
 cat <<EOF > ${FILE}
 nameserver 127.0.0.1
