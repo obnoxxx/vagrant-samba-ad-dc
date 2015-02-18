@@ -33,7 +33,9 @@ then conveniently be reconfigured modifying that file.
 
 ## TODO
 
-* ...
+* make provisioning reentrant/idempotent
+* maybe do that using ansible?
+* make the AD config parameters configurable
 
 ## Author
 
