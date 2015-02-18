@@ -27,7 +27,11 @@ vms = [
   {
     :hostname => 's4dc-180',
     :box => 'local-trusty64',
-    :container_name => 's4dc-180',
+    :provider => {
+      :lxc => {
+        :container_name => 's4dc-180',
+      },
+    },
     :networks => [
       {
         :link => 'virbr1',
@@ -136,7 +140,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       node.vm.box = machine[:box]
       node.vm.hostname = machine[:hostname]
       node.vm.provider :lxc do |lxc|
-        lxc.container_name = machine[:container_name]
+        lxc.container_name = machine[:provider][:lxc][:container_name]
 
         machine[:networks].each do |net|
           network_opts.each do |key|
