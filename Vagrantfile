@@ -99,8 +99,8 @@ end
 SCRIPT_INSTALL = <<SCRIPT
 set -e
 
-apt-get -y update
-apt-get -y upgrade
+#apt-get -y update
+#apt-get -y upgrade
 apt-get -y install samba
 SCRIPT
 
