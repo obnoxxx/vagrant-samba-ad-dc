@@ -26,7 +26,7 @@ network_opts = [ :type, :link, :flags, :hwaddr, :name, :ipv4, :ipv6 ]
 vms = [
   {
     :hostname => 's4dc-180',
-    :box => 'local-trusty64',
+    :box => 'fgrehm/trusty64-lxc',
     :provider => {
       :lxc => {
         :container_name => 's4dc-180',
