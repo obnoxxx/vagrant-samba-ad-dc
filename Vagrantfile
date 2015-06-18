@@ -103,7 +103,7 @@ set -e
 
 #apt-get -y update
 #apt-get -y upgrade
-apt-get -y install samba
+apt-get -y install samba dnsutils
 SCRIPT
 
 SCRIPT_PROVISION = <<SCRIPT
