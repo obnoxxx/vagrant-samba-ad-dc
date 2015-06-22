@@ -110,9 +110,21 @@ SCRIPT_PROVISION = <<SCRIPT
 set -e
 
 DOMAIN=$1
-REALM=$2
-ADMINPASS=$3
-FUNCTION_LEVEL=$4
+shift
+REALM=$1
+shift
+ADMINPASS=$1
+shift
+FUNCTION_LEVEL=$1
+shift
+
+DOMAIN_SID=$1
+shift
+if [ -n "$DOMAIN_SID" ]; then
+	DOM_SID="--domain-sid=${DOMAIN_SID}"
+else
+	DOM_SID=""
+fi
 
 stop smbd || true
 stop nmbd || true
@@ -130,6 +142,7 @@ samba-tool domain provision \
 	--adminpass=${ADMINPASS} \
 	--server-role=dc \
 	--function-level=${FUNCTION_LEVEL} \
+	${DOM_SID} \
 	--use-rfc2307
 
 FILE=/etc/resolv.conf
@@ -174,10 +187,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       node.vm.provision :shell, inline: SCRIPT_INSTALL
       if machine[:role] == 's4dc'
         cfg = machine[:config][:s4dc]
+        puts "domain_sid: '#{cfg[:domain_sid]}'"        
         node.vm.provision :shell do |s|
           s.inline = SCRIPT_PROVISION
           s.args   = [ cfg[:domain], cfg[:realm], cfg[:adminpass],
-                       cfg[:function_level] ]
+                       cfg[:function_level], cfg[:domain_sid] ]
         end
       end
     end
